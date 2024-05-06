@@ -92,5 +92,3 @@ class Informitif:
         stem = self.raciner(verb)
         inf, group = self.infinitiver(stem)
         return inf, group
-
-
