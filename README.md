@@ -11,7 +11,7 @@ verbes = [
     "probabilliez",
     "exterpelait",
     "exterpelions",
-    "hypercarriaient",
+    "hypercarraient",
 ]
 
 f = Informitif()
@@ -24,6 +24,6 @@ for i in verbes:
 ('probabiller', 'lancer')
 ('exterpeler', 'jeter')
 ('exterpeler', 'jeter')
-('hypercarrier', 'lancer')
+('hypercarrer', 'lancer')
 # output: l'infinitif reconstitué et un verbe du même sous-groupe.
 ```
