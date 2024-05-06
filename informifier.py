@@ -1,19 +1,13 @@
+"""essaie de reconstruire l'infinitif d'un verbe du premier groupe."""
+
 import re
-
-
-test_verbs = [
-    "informifie",
-    "informifions",
-    "hyperifierais",
-    "probabilliez",
-    "marouflaient",
-    "exterpelait",
-]
 
 
 class Informitif:
     """cherche l'infinitif d'un verbe du premier groupe."""
-    term = set([
+
+    terminaisons_premier_groupe = set(
+        [
             # 1) indicatif
             # 1.1) présent
             ["e", "es", "e", "ons", "ez", "ent"]
@@ -41,14 +35,14 @@ class Informitif:
             + ["ant"]
             # 5.2) passé
             + ["é", "és", "ée", "ées"]
-    ][0])
+        ][0]
+    )
 
     def __init__(self):
         """initie un objet pour trouver l'infinitif de verbes."""
 
-        t = r"|".join(self.term)
-        x = fr"({t})$"
-        self.re_term = re.compile(x)
+        terms = r"|".join(self.terminaisons_premier_groupe)
+        self.re_term = re.compile(rf"({terms})$")
 
         # deux listes utiles pour essayer de distinguer entre les verbes en -e<consonne>er et -é<consonne>er, même si c'est loin d'être parfait.
         e_consonne = ["c", "d", "g", "m", "n", "p", "r", "s", "v", "vr"]
@@ -67,32 +61,36 @@ class Informitif:
         self.re_g = re.compile("ge?$")  # ger
         self.re_eler = re.compile("(èl|ell?)$")  # eler
         self.re_eter = re.compile("(èt|ett?)$")  # eter
-        self.re_iy = re.compile("[yi]$")  # yer
+        self.re_y = re.compile("y$")  # yer
+        self.re_voyellei = re.compile("([aou])i$")  # [aou]yer
         self.re_eaiguer = re.compile(rf"[èé]({eaigu_consonne})$")
         self.re_econsonneer = re.compile(rf"[eè]({e_consonne})$")
 
         self.rules = [
             (self.re_c, "cer", "lancer"),
             (self.re_g, "ger", "lancer"),
-            (self.re_iy, "yer", "lancer")
+            (self.re_voyellei, r"\1yer", "lancer"),
+            (self.re_y, "yer", "lancer"),
             (self.re_eler, "eler", "jeter"),
             (self.re_eter, "eter", "jeter"),
-            (self.re_eaiguer, r"é\1", "sécher"),
-            (self.re_econsonneer, r"e\1", "sécher"),
+            (self.re_eaiguer, r"é\1er", "sécher"),
+            (self.re_econsonneer, r"e\1er", "sécher"),
         ]
 
-        def raciner(verb):
-            """enlève la terminaison d'un verbe du premier groupe."""
+    def raciner(self, verb):
+        """enlève la terminaison d'un verbe du premier groupe."""
 
-            return self.re_term.sub("", verb)
+        return self.re_term.sub("", verb)
 
-        def infinitiver(self, verb):
-            for pattern, term, group in self.rules:
-                if pattern.search(verb):
-                    return pattern.sub(term, verb), group
-            return verb + "er", "lancer"
+    def infinitiver(self, verb):
+        for pattern, term, group in self.rules:
+            if pattern.search(verb):
+                return pattern.sub(term, verb), group
+        return verb + "er", "lancer"
 
-        def __call__(self, verb):
-            stem = self.raciner(verb)
-            inf, group = self.infinitiver(stem)
-            return inf, group
+    def __call__(self, verb):
+        stem = self.raciner(verb)
+        inf, group = self.infinitiver(stem)
+        return inf, group
+
+
