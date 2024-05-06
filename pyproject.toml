@@ -1,6 +1,6 @@
 [project]
 name = "informifier"
-authours = [{name="thjbdvlt"}]
+authors = [{name="thjbdvlt"}]
 version = "0.1.0"
 description = "reconstituer l'infinitif d'un néoverbe du premier groupe."
 readme = "READM.md"
