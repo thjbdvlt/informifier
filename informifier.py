@@ -26,7 +26,14 @@ class Informitif:
             + ["asse", "asses", "ât", "assions", "assiez", "assent"]
             # 3) conditionnel
             # 3.1) présent
-            + ["erais", "erais", "erait", "erions", "eriez", "eraient"]
+            + [
+                "erais",
+                "erais",
+                "erait",
+                "erions",
+                "eriez",
+                "eraient",
+            ]
             # 4) impératif
             # 4.1) présent
             + ["e", "ons", "ez"]
@@ -45,7 +52,18 @@ class Informitif:
         self.re_term = re.compile(rf"({terms})$")
 
         # deux listes utiles pour essayer de distinguer entre les verbes en -e<consonne>er et -é<consonne>er, même si c'est loin d'être parfait.
-        e_consonne = ["c", "d", "g", "m", "n", "p", "r", "s", "v", "vr"]
+        e_consonne = [
+            "c",
+            "d",
+            "g",
+            "m",
+            "n",
+            "p",
+            "r",
+            "s",
+            "v",
+            "vr",
+        ]
         # fmt: off
         eaigu_consonne = [
             "b", "br", "c", "ch", "cr", "d", "fl", "g", "gl", 

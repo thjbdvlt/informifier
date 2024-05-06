@@ -14,7 +14,7 @@ test_verbs = [
     "lançons",
     "lanceraient",
     "sécheraient",
-    "sèchons"
+    "sèchons",
 ]
 
 f = Informitif()
