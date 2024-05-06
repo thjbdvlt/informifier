@@ -1,5 +1,6 @@
 import re
 
+
 test_verbs = [
     "informifie",
     "informifions",
@@ -9,100 +10,89 @@ test_verbs = [
     "exterpelait",
 ]
 
-verb = test_verbs[2]
 
-# il faut faire par étape.
-# quels sont les différents sous-groupes des verbes du premier groupe, et comment les reconnaître?
-#
+class Informitif:
+    """cherche l'infinitif d'un verbe du premier groupe."""
+    term = set([
+            # 1) indicatif
+            # 1.1) présent
+            ["e", "es", "e", "ons", "ez", "ent"]
+            # 1.2) imparfait
+            + ["ais", "ais", "ait", "ions", "iez", "aient"]
+            # 1.3) futur simple
+            + ["erai", "eras", "era", "erons", "erez", "eront"]
+            # 1.4) passé simple
+            + ["ai", "as", "a", "âmes", "âtes", "èrent"]
+            # 1.5) passé composé
+            + ["é", "é", "é", "é", "é", "é", "é"]
+            # 2) subjonctif
+            # 2.1) présent
+            + ["e", "es", "e", "ions", "iez", "ent"]
+            # 2.2) imparfait
+            + ["asse", "asses", "ât", "assions", "assiez", "assent"]
+            # 3) conditionnel
+            # 3.1) présent
+            + ["erais", "erais", "erait", "erions", "eriez", "eraient"]
+            # 4) impératif
+            # 4.1) présent
+            + ["e", "ons", "ez"]
+            # 5) participe
+            # 5.1) présent
+            + ["ant"]
+            # 5.2) passé
+            + ["é", "és", "ée", "ées"]
+    ][0])
 
-# plusieurs groupes d'exceptions qui modifie le radical:
-# verbes en -cer.
-# verbes en -ger.
-# verbes en -e<consonne>-er (1)
-# verbes en -e<consonne>-er (2)
-# verbes en -é<consonne(s)>-er
-# verbes en -yer
-# verbes en -ayer
-# verbes en -oyer
-# verbes en -eyer
-# verbe envoyer et dérivés, encore une exception.
+    def __init__(self):
+        """initie un objet pour trouver l'infinitif de verbes."""
 
+        t = r"|".join(self.term)
+        x = fr"({t})$"
+        self.re_term = re.compile(x)
 
-# les verbes en -cer et -ger, on ajoute un -e ou on remplace c par ç avant un "o" ou un "a".
+        # deux listes utiles pour essayer de distinguer entre les verbes en -e<consonne>er et -é<consonne>er, même si c'est loin d'être parfait.
+        e_consonne = ["c", "d", "g", "m", "n", "p", "r", "s", "v", "vr"]
+        # fmt: off
+        eaigu_consonne = [
+            "b", "br", "c", "ch", "cr", "d", "fl", "g", "gl", 
+            "gn", "gr", "gu", "j", "l", "m", "n", "p", "qu", 
+            "r", "s", "t", "tr", "v", "vr",
+        ]
+        # fmt: on
+        eaigu_consonne = r"|".join(eaigu_consonne)
+        e_consonne = r"|".join(e_consonne)
 
-# if verbe_ger(verb): # ex. manger
-#     # ge(ai[st]|aient|ons|ont)
-#     infinitif = re.sub(terminaison, "ger", verb)
-#     like = "manger"
-# elif verbe_cer(verb): # ex. lancer
-#     # en soi, je peux aussi simplement enlever le "e" et m'en ficher?
-#     infinitif = re.sub()
-#     like = "lancer"
-# elif verbe_e_consonne_1(verb):
-#     ...
-# elif verbe_e_consonne_2(verb):
-#     ...
-# elif verb_eaigu_consonne(verb):
-#     ...
-# elif verbe_yer(verb):
-#     ...
-# elif verbe_ayer(verb):
-#     ...
-# elif verbe_oyer(verb):
-#     ...
-# elif verbe_eyer(verb):
-#     ...
+        # compile les regexes
+        self.re_c = re.compile("(ç|c)$")  # cer
+        self.re_g = re.compile("ge?$")  # ger
+        self.re_eler = re.compile("(èl|ell?)$")  # eler
+        self.re_eter = re.compile("(èt|ett?)$")  # eter
+        self.re_iy = re.compile("[yi]$")  # yer
+        self.re_eaiguer = re.compile(rf"[èé]({eaigu_consonne})$")
+        self.re_econsonneer = re.compile(rf"[eè]({e_consonne})$")
 
-terminaisons = set(
-    [
-        # 1) indicatif
-        # 1.1) présent
-        ["e", "es", "e", "ons", "ez", "ent"]
-        # 1.2) imparfait
-        + ["ais", "ais", "ait", "ions", "iez", "aient"]
-        # 1.3) futur simple
-        + ["erai", "eras", "era", "erons", "erez", "eront"]
-        # 1.4) passé simple
-        + ["ai", "as", "a", "âmes", "âtes", "èrent"]
-        # 1.5) passé composé
-        + ["é", "é", "é", "é", "é", "é", "é"]
-        # 2) subjonctif
-        # 2.1) présent
-        + ["e", "es", "e", "ions", "iez", "ent"]
-        # 2.2) imparfait
-        + ["asse", "asses", "ât", "assions", "assiez", "assent"]
-        # 3) conditionnel
-        # 3.1) présent
-        + ["erais", "erais", "erait", "erions", "eriez", "eraient"]
-        # 4) impératif
-        # 4.1) présent
-        + ["e", "ons", "ez"]
-        # 5) participe
-        # 5.1) présent
-        + ["ant"]
-        # 5.2) passé
-        + ["é", "és", "ée", "ées"]
-    ][0]
-)
+        self.rules = [
+            (self.re_c, "cer", "lancer"),
+            (self.re_g, "ger", "lancer"),
+            (self.re_iy, "yer", "lancer")
+            (self.re_eler, "eler", "jeter"),
+            (self.re_eter, "eter", "jeter"),
+            (self.re_eaiguer, r"é\1", "sécher"),
+            (self.re_econsonneer, r"e\1", "sécher"),
+        ]
 
-# pour obtenir les terminaisons en [ao], qui requièrent un traitement particulier pour certains verbes, il suffit de regarder la première lettre.
-terminaison_ao = {i for i in set(terminaisons) if i[0] in ("a", "â", "o")}
-terminaison_pas_ao = terminaisons - terminaison_ao
+        def raciner(verb):
+            """enlève la terminaison d'un verbe du premier groupe."""
 
-# je vérifie que tout est là:
-print(len(terminaisons) - len(terminaison_ao) - len(terminaison_pas_ao))
+            return self.re_term.sub("", verb)
 
-verbe_en_ger = rf"ge({r'|'.join(terminaison_ao)})$|g({r'|'.join(terminaison_pas_ao)})$"
+        def infinitiver(self, verb):
+            for pattern, term, group in self.rules:
+                if pattern.search(verb):
+                    return pattern.sub(term, verb), group
+            return verb + "er", "lancer"
 
-verbe_en_cer = rf"ç({r'|'.join(terminaison_ao)})$|c({r'|'.join(terminaison_pas_ao)})$"
-
-
-re.sub(verbe_en_cer, "cer", 'lançons')
-
-for i in ["lancer", "lançons", "lancez", "lance", "lanceraient", "lançais", "lançaient"]:
-    print(i, re.sub(verbe_en_cer, "cer", i))
-
-for i in ["mangeais", "mangions", "mangerons", "mangerions", "mangeant"]:
-    print(i, re.sub(verbe_en_ger, "ger", i))
-
-
+        def __call__(self, verb):
+            stem = self.raciner(verb)
+            inf, group = self.infinitiver(stem)
+            return inf, group
