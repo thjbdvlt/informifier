@@ -8,6 +8,8 @@ class Informitif:
 
     terminaisons_premier_groupe = set(
         [
+            # infinitif
+            "er",
             # 1) indicatif
             # 1.1) présent
             ["e", "es", "e", "ons", "ez", "ent"]
