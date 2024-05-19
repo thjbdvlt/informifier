@@ -101,12 +101,16 @@ class Informitif:
         return self.re_term.sub("", verb)
 
     def infinitiver(self, verb):
+        """refaire l'infinitif et trouver un verbe modèle."""
+
         for pattern, term, group in self.rules:
             if pattern.search(verb):
                 return pattern.sub(term, verb), group
         return verb + "er", "lancer"
 
     def __call__(self, verb):
+        """racine, infinitive et trouve le modèle."""
+
         stem = self.raciner(verb)
         inf, group = self.infinitiver(stem)
         return inf, group
