@@ -14,8 +14,6 @@ verbes = [
     "hypercarraient",
 ]
 
-f = Informitif()
-
 for i in verbes:
     f(i)
 

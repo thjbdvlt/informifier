@@ -43,7 +43,7 @@ class Informitif:
             # 5.1) présent
             + ["ant"]
             # 5.2) passé
-            + ["é", "és", "ée", "ées"]
+            + ["é", "és", "ée", "ées"],
         ][0]
     )
 
