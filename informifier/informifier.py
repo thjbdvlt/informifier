@@ -44,7 +44,7 @@ class Informitif:
             + ["ant"]
             # 5.2) passé
             + ["é", "és", "ée", "ées"],
-        ][0]
+        ]
     )
 
     def __init__(self):
