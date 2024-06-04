@@ -1,116 +1,42 @@
-"""essaie de reconstruire l'infinitif d'un verbe du premier groupe."""
-
-import re
+from informifier.patterns import RULES, re_term
 
 
-class Informitif:
-    """cherche l'infinitif d'un verbe du premier groupe."""
+def raciner(verb):
+    """Enlève la terminaison d'un verbe du premier groupe.
 
-    terminaisons_premier_groupe = set(
-        # infinitif
-        ["er"]
-        # 1) indicatif
-        # 1.1) présent
-        + ["e", "es", "e", "ons", "ez", "ent"]
-        # 1.2) imparfait
-        + ["ais", "ais", "ait", "ions", "iez", "aient"]
-        # 1.3) futur simple
-        + ["erai", "eras", "era", "erons", "erez", "eront"]
-        # 1.4) passé simple
-        + ["ai", "as", "a", "âmes", "âtes", "èrent"]
-        # 1.5) passé composé
-        + ["é", "é", "é", "é", "é", "é", "é"]
-        # 2) subjonctif
-        # 2.1) présent
-        + ["e", "es", "e", "ions", "iez", "ent"]
-        # 2.2) imparfait
-        + ["asse", "asses", "ât", "assions", "assiez", "assent"]
-        # 3) conditionnel
-        # 3.1) présent
-        + [
-            "erais",
-            "erais",
-            "erait",
-            "erions",
-            "eriez",
-            "eraient",
-        ]
-        # 4) impératif
-        # 4.1) présent
-        + ["e", "ons", "ez"]
-        # 5) participe
-        # 5.1) présent
-        + ["ant"]
-        # 5.2) passé
-        + ["é", "és", "ée", "ées"]
-    )
+    Args:
+        verb (str):  le verbe, conjugué ou non.
 
-    def __init__(self):
-        """initie un objet pour trouver l'infinitif de verbes."""
+    Returns (str):  la racine du verbe.
+    """
 
-        terms = r"|".join(self.terminaisons_premier_groupe)
-        self.re_term = re.compile(rf"({terms})$")
+    return re_term.sub("", verb)
 
-        # deux listes utiles pour essayer de distinguer entre les verbes en -e<consonne>er et -é<consonne>er, même si c'est loin d'être parfait.
-        e_consonne = [
-            "c",
-            "d",
-            "g",
-            "m",
-            "n",
-            "p",
-            "r",
-            "s",
-            "v",
-            "vr",
-        ]
-        # fmt: off
-        eaigu_consonne = [
-            "b", "br", "c", "ch", "cr", "d", "fl", "g", "gl", 
-            "gn", "gr", "gu", "j", "l", "m", "n", "p", "qu", 
-            "r", "s", "t", "tr", "v", "vr",
-        ]
-        # fmt: on
-        eaigu_consonne = r"|".join(eaigu_consonne)
-        e_consonne = r"|".join(e_consonne)
 
-        # compile les regexes
-        self.re_c = re.compile("(ç|c)$")  # cer
-        self.re_g = re.compile("ge?$")  # ger
-        self.re_eler = re.compile("(èl|ell?)$")  # eler
-        self.re_eter = re.compile("(èt|ett?)$")  # eter
-        self.re_y = re.compile("y$")  # yer
-        self.re_voyellei = re.compile("([aou])i$")  # [aou]yer
-        self.re_eaiguer = re.compile(rf"[èé]({eaigu_consonne})$")
-        self.re_econsonneer = re.compile(rf"[eè]({e_consonne})$")
+def _infinitiver(verb_stem):
+    """Refaire l'infinitif et trouver un verbe modèle.
 
-        self.rules = [
-            (self.re_c, "cer", "lancer"),
-            (self.re_g, "ger", "lancer"),
-            (self.re_voyellei, r"\1yer", "lancer"),
-            (self.re_y, "yer", "lancer"),
-            (self.re_eler, "eler", "jeter"),
-            (self.re_eter, "eter", "jeter"),
-            (self.re_eaiguer, r"é\1er", "sécher"),
-            (self.re_econsonneer, r"e\1er", "sécher"),
-        ]
+    Args:
+        verb_stem (str):  la racine du verbe.
 
-    def raciner(self, verb):
-        """enlève la terminaison d'un verbe du premier groupe."""
+    Returns (tuple):  l'infinitif du verbe et un verbe du même groupe.
+    """
 
-        return self.re_term.sub("", verb)
+    for pattern, term, group in RULES:
+        if pattern.search(verb_stem):
+            return pattern.sub(term, verb_stem), group
+    return verb_stem + "er", "lancer"  # par défaut: lancer
 
-    def infinitiver(self, verb):
-        """refaire l'infinitif et trouver un verbe modèle."""
 
-        for pattern, term, group in self.rules:
-            if pattern.search(verb):
-                return pattern.sub(term, verb), group
-        return verb + "er", "lancer"
+def informifier(verb):
+    """Racine, infinitive et trouve le modèle.
 
-    def __call__(self, verb):
-        """racine, infinitive et trouve le modèle."""
+    Args:
+        verb (str):  le verbe conjugué ou non.
 
-        stem = self.raciner(verb)
-        inf, group = self.infinitiver(stem)
-        return inf, group
+    Returns (tuple):  l'infinitif du verbe et un verbe du même groupe.
+    """
+
+    stem = raciner(verb)
+    inf, group = _infinitiver(stem)
+    return inf, group

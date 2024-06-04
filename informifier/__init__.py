@@ -1,1 +1,1 @@
-from informifier.informifier import Informitif
+from informifier.informifier import informifier
