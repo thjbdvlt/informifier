@@ -1,1 +1,3 @@
-from informifier.informifier import informifier
+import informifier.dedeforme
+
+informifier = informifier.dedeforme.informifier
